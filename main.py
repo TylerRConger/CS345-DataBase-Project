@@ -109,6 +109,16 @@ def getAStaffByID(cursor,id):
     cursor.execute("SELECT * FROM staff WHERE id='"+str(id)+"'")
     return cursor.fetchall()
 
+# Get a staff member's name
+# param: curs - cursor object of the database
+# param: id - staff member's id number
+# return: the name of the staff member requested
+def getAStaffName(cursor, id):
+    cursor.execute("SELECT * FROM staff WHERE id='" + str(id) + "'")
+    myStaffMember = cursor.fetchall()
+    name = myStaffMember[0] + " " + myStaffMember[1]
+    return name
+
 # Get a staff member from the database by last name (LN)
 # param: curs - cursor object of the database
 # param: last - last name as a string of the staff member
@@ -253,9 +263,12 @@ def getPay(cursor, ID):
     level = getLevel(cursor, ID)
     allPositions = getAllPositions(cursor)
 
+    # loop through all positions and compare the level to employees level
     for i in range(len(allPositions)):
+        # if we find a  mathch return that pay scale
         if int(level) == int(allPositions[i][4]):
             return int(allPositions[i][1])
+    # otherwise return -1 at the end
     return -1
 
 # get an individuals pay type
@@ -279,9 +292,12 @@ def getChristmasBonus(cursor, ID):
     level = getLevel(cursor, ID)
     allPositions = getAllPositions(cursor)
 
+    # loop through all positions and compare the level to employees level
     for i in range(len(allPositions)):
+        # if we find an equal level, return their bonus
         if int(level) == int(allPositions[i][4]):
             return int(allPositions[i][3])
+    # otherwise return -1
     return -1
 
 # get an individuals level in the company
@@ -368,6 +384,8 @@ if __name__ == '__main__':
     print("Our Current Staff: " + str(getAllStaff(curs)))
 
     print("Firing Jake Mann")
+
+
 
     removeAStaffMember(conn, curs, getAStaffIDByName(curs, "Jake", "Mann"))
 
