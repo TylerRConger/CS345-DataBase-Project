@@ -56,6 +56,12 @@ def dataBaseInteraction(curs):
                     bonus integer,
                     level integer
                     )""")
+    curs.execute("""CREATE TABLE potentialhires (
+                first text,
+                last text,
+                hireability integer,
+                level integer
+                )""")
 
 # Add a position to the payscale database
 # param: con - connection to the database
@@ -66,6 +72,17 @@ def dataBaseInteraction(curs):
 def addPosition(con, cursor, position, pay, payType, level):
     bonus = generateBonus(pay)
     cursor.execute("INSERT INTO payscale VALUES ('"+position+"', "+str(pay)+", '"+payType+"', " + str(bonus)+", "+str(level)+")")
+    con.commit
+
+# Add a potential hire to the database
+# param: con - connection to the database
+# param: curs - cursor object of the database
+# param: first - first name as a string of the staff member
+# param: last - last name as a string of the staff member
+# param: hireability - a percentage score of how good a candidate they are
+# param: level - the position they interviewed for
+def addPotentialHire(con, cursor, first, last, hireability, level):
+    cursor.execute("INSERT INTO potentialhires VALUES ('" + first + "', '"+last+"','"+str(hireability)+"','"+str(level)+"')")
     con.commit
 
 # Generate a christmas bonus off the pay scale
@@ -101,18 +118,23 @@ def getAllStaffByLN(cursor,last):
     return cursor.fetchall()
 
 # Get a staff member from the database by first name (FN)
-# param: curs - cursor object of the database
+# param: cursor - cursor object of the database
 # param: first - first name as a string of the staff member
 # return: a list of all staff with the given first name
 def getAllStaffByFN(cursor,first):
     cursor.execute("SELECT * FROM staff WHERE first='" + first + "'")
     return cursor.fetchall()
 
+# Get all the current staff
+# param: cursor - cursor object of the database
+# return: the entire staff
 def getAllStaff(cursor):
     cursor.execute("SELECT * FROM staff")
     return cursor.fetchall()
 
-
+# Get all the current positions in the company
+# param: cursor - cursor object of the database
+# return: all positions in the company
 def getAllPositions(cursor):
     cursor.execute("SELECT * FROM payscale")
     return cursor.fetchall()
@@ -223,7 +245,10 @@ def increaseOffenses (con, cursor, ID):
     currentOffenses += 1
     setOffenses(con, cursor, currentOffenses, ID)
 
-
+# get an individuals pay
+# param: curs - cursor object of the database
+# param: ID - This staff's ID number
+# return the amount they make per year, or -1 if they don't exsist
 def getPay(cursor, ID):
     level = getLevel(cursor, ID)
     allPositions = getAllPositions(cursor)
@@ -233,7 +258,10 @@ def getPay(cursor, ID):
             return int(allPositions[i][1])
     return -1
 
-
+# get an individuals pay type
+# param: curs - cursor object of the database
+# param: ID - This staff's ID number
+# return the way their pay is handed out
 def getPayType(cursor, ID):
     level = getLevel(cursor, ID)
     allPositions = getAllPositions(cursor)
@@ -243,6 +271,10 @@ def getPayType(cursor, ID):
             return int(allPositions[i][2])
     return "Not Valid"
 
+# get an individuals bonus amount
+# param: curs - cursor object of the database
+# param: ID - This staff's ID number
+# return the amount they get as a bonus during the holidays
 def getChristmasBonus(cursor, ID):
     level = getLevel(cursor, ID)
     allPositions = getAllPositions(cursor)
@@ -252,14 +284,30 @@ def getChristmasBonus(cursor, ID):
             return int(allPositions[i][3])
     return -1
 
+# get an individuals level in the company
+# param: curs - cursor object of the database
+# param: ID - This staff's ID number
+# return the way the staff members level in the company
 def getLevel(cursor, ID):
     level = getAStaffByID(cursor, ID)[0][2]
     return level
 
+# get an individuals number of offenses
+# param: curs - cursor object of the database
+# param: ID - This staff's ID number
+# return the number of offenses that have occured
 def getOffenses(cursor, ID):
     offenses = getAStaffByID(cursor, ID)[0][3]
     return offenses
 
+# Remove a staff member from the database
+# param: con - connection to the database
+# param: curs - cursor object of the database
+# param: ID - This staff's ID number
+def removeAStaffMember(con, cursor, ID):
+    sql = "DELETE FROM staff WHERE id="+ID
+    cursor.execute(sql)
+    con.commit
 
 # main function
 if __name__ == '__main__':
@@ -291,6 +339,12 @@ if __name__ == '__main__':
     addPosition(conn, curs, "Manager", 60000, "check", 3)
     addPosition(conn, curs, "CEO", 100000, "stock-options", 4)
 
+    # add some potential hires
+    addPotentialHire(conn, curs, "Jeffery", "Dahmer", 0, 4)
+    addPotentialHire(conn, curs, "Ted", "Bundy", 35, 2)
+    addPotentialHire(conn, curs, "Richard", "Ramirez", 19, 2)
+    addPotentialHire(conn, curs, "Aileen", "Wuornous", 85, 1)
+
     print("All staff ending with Eka" + str(getAllStaffByLN(curs,"Eka")))
 
     print("Changing Beera Eka's first and last names")
@@ -311,9 +365,13 @@ if __name__ == '__main__':
 
     print("Tyler Conger, gets paid: "+ str(getPay(curs,getAStaffIDByName(curs,"Tyler","Conger"))))
 
+    print("Our Current Staff: " + str(getAllStaff(curs)))
 
+    print("Firing Jake Mann")
 
+    removeAStaffMember(conn, curs, getAStaffIDByName(curs, "Jake", "Mann"))
 
+    print("Our updated staff: " + str(getAllStaff(curs)))
 
     # close the open database with a function
     closeTheDB(conn)
