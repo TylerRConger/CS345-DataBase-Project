@@ -108,6 +108,16 @@ def getAllStaffByFN(cursor,first):
     cursor.execute("SELECT * FROM staff WHERE first='" + first + "'")
     return cursor.fetchall()
 
+def getAllStaff(cursor):
+    cursor.execute("SELECT * FROM staff")
+    return cursor.fetchall()
+
+
+def getAllPositions(cursor):
+    cursor.execute("SELECT * FROM payscale")
+    return cursor.fetchall()
+
+
 # Remove a staff from the database by ID
 # param: cursor - cursor object of the database
 # param: id - staff member's id number
@@ -214,8 +224,18 @@ def increaseOffenses (con, cursor, ID):
     setOffenses(con, cursor, currentOffenses, ID)
 
 
-def getPay(con, cursor, ID):
+def getPay(cursor, ID):
+    getLevel(cursor, ID)
+
     return ""
+
+def getLevel(cursor, ID):
+    level = getAStaffByID(cursor, ID)[2]
+    return level
+
+def getOffenses(cursor, ID):
+    offenses = getAStaffByID(cursor, ID)[3]
+    return offenses
 
 
 # main function
