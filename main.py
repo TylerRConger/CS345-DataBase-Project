@@ -225,16 +225,39 @@ def increaseOffenses (con, cursor, ID):
 
 
 def getPay(cursor, ID):
-    getLevel(cursor, ID)
+    level = getLevel(cursor, ID)
+    allPositions = getAllPositions(cursor)
 
-    return ""
+    for i in range(len(allPositions)):
+        if int(level) == int(allPositions[i][4]):
+            return int(allPositions[i][1])
+    return -1
+
+
+def getPayType(cursor, ID):
+    level = getLevel(cursor, ID)
+    allPositions = getAllPositions(cursor)
+
+    for i in range(len(allPositions)):
+        if int(level) == int(allPositions[i][4]):
+            return int(allPositions[i][2])
+    return "Not Valid"
+
+def getChristmasBonus(cursor, ID):
+    level = getLevel(cursor, ID)
+    allPositions = getAllPositions(cursor)
+
+    for i in range(len(allPositions)):
+        if int(level) == int(allPositions[i][4]):
+            return int(allPositions[i][3])
+    return -1
 
 def getLevel(cursor, ID):
-    level = getAStaffByID(cursor, ID)[2]
+    level = getAStaffByID(cursor, ID)[0][2]
     return level
 
 def getOffenses(cursor, ID):
-    offenses = getAStaffByID(cursor, ID)[3]
+    offenses = getAStaffByID(cursor, ID)[0][3]
     return offenses
 
 
@@ -285,6 +308,8 @@ if __name__ == '__main__':
     increaseOffenses(conn, curs, getAStaffIDByName(curs, "Tyler", "Conger"))
 
     print("Tyler Conger's info: " + str(getAStaffByID(curs, getAStaffIDByName(curs, "Tyler", "Conger"))))
+
+    print("Tyler Conger, gets paid: "+ str(getPay(curs,getAStaffIDByName(curs,"Tyler","Conger"))))
 
 
 
